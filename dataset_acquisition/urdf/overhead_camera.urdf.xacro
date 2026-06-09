@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!--
+  Standalone overhead camera model for dataset acquisition.
+
+  Camera spec: FLIR Hadron 640R EO (reduced resolution)
+    Resolution : 924 × 690 px
+    H-FOV      : 67° (1.1694 rad)
+    EFL        : 4.8 mm  F/2.3
+    Derived intrinsics: fx=fy≈698  cx=462  cy=345
+
+  Coordinate chain
+  ─────────────────
+  base_link  ──RPY(0, π/2, 0)──▶  overhead_cam_link  ──RPY(−π/2, 0, −π/2)──▶  overhead_cam_optical
+                                   (camera looks along +X)
+                                   with joint pitch=π/2 this +X = world −Z
+                                   → camera looks NADIR when base_link yaw-only
+
+  Camera yaw in set_model_state controls the image rotation.
+  Use annotator.py build_world_to_optical(cam_yaw_rad) to project points.
+-->
+<robot name="overhead_cam" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="M_PI" value="3.14159265358979"/>
+
+  <!-- Root link — placed at camera position in world via set_model_state -->
+  <link name="base_link">
+    <visual>
+      <geometry><sphere radius="0.05"/></geometry>
+      <material name="red"><color rgba="1 0 0 1"/></material>
+    </visual>
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+  <!--
+    Camera sensor link.
+    Joint pitch = π/2  →  camera_link +X  =  base_link −Z  =  world −Z  (nadir).
+  -->
+  <link name="overhead_cam_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 ${M_PI/2} 0"/>
+      <geometry><cylinder radius="0.02" length="0.06"/></geometry>
+      <material name="grey"><color rgba="0.3 0.3 0.3 1"/></material>
+    </visual>
+  </link>
+  <joint name="cam_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 ${M_PI/2} 0"/>
+    <parent link="base_link"/>
+    <child link="overhead_cam_link"/>
+  </joint>
+
+  <!-- Optical frame — standard ROS convention: x=right, y=down, z=forward -->
+  <link name="overhead_cam_optical"/>
+  <joint name="cam_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
+    <parent link="overhead_cam_link"/>
+    <child link="overhead_cam_optical"/>
+  </joint>
+
+  <!-- Gazebo camera sensor -->
+  <gazebo reference="overhead_cam_link">
+    <sensor type="camera" name="overhead_cam_sensor">
+      <update_rate>30.0</update_rate>
+      <camera name="overhead_cam_camera">
+        <horizontal_fov>1.1693706</horizontal_fov>  <!-- 67° in radians -->
+        <image>
+          <width>924</width>
+          <height>690</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.5</near>
+          <far>500</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="overhead_cam_plugin" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>overhead_cam</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>overhead_cam_optical</frameName>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Make base_link static in Gazebo (no gravity, no physics) -->
+  <gazebo reference="base_link">
+    <static>true</static>
+    <turnGravityOff>true</turnGravityOff>
+  </gazebo>
+  <gazebo reference="overhead_cam_link">
+    <turnGravityOff>true</turnGravityOff>
+  </gazebo>
+
+</robot>

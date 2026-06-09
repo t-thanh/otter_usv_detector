@@ -1,0 +1,46 @@
+# Fixed lighting conditions used for dataset acquisition and testing.
+# Stored here so future sessions can reproduce the exact visual appearance,
+# or swap to a different preset without touching world/launch files.
+#
+# To apply a different preset: edit values then regenerate the world file
+# (worlds/open_water.world) and re-run the launch.
+
+preset_name: "midday_clear"
+
+sun:
+  # Directional light — direction vector (x,y,z) pointing FROM scene TO light source
+  # Positive Z = overhead; negative X = light comes from the east.
+  direction_x: -0.4
+  direction_y:  0.2
+  direction_z: -0.9        # Mostly overhead, slight south-east bias
+  diffuse_r:  0.9
+  diffuse_g:  0.9
+  diffuse_b:  0.85
+  diffuse_a:  1.0
+  specular_r: 0.3
+  specular_g: 0.3
+  specular_b: 0.25
+  specular_a: 1.0
+  cast_shadows: true
+
+ambient:
+  r: 0.4
+  g: 0.4
+  b: 0.45
+  a: 1.0
+
+sky:
+  cloud_speed: 0            # Static clouds — fully reproducible frames
+
+# ── Alternative presets (for future phases) ──────────────────────────────────
+# Uncomment and copy values above to switch:
+#
+# preset: "overcast"
+#   sun direction_z: -0.95  (near overhead)
+#   diffuse 0.6 0.6 0.65    (softer)
+#   ambient 0.55 0.55 0.6   (higher ambient, flatter shadows)
+#
+# preset: "low_sun"         (dawn / dusk simulation)
+#   sun direction_x: -0.9, direction_z: -0.2
+#   diffuse 0.9 0.6 0.3     (warm orange)
+#   ambient 0.2 0.18 0.2    (darker shadows)

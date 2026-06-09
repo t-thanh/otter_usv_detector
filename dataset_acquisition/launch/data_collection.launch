@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- ── Arguments ─────────────────────────────────────────────────────────── -->
+  <arg name="gui"          default="true"  doc="Show Gazebo GUI"/>
+  <arg name="verbose"      default="false" doc="Verbose Gazebo output"/>
+  <arg name="preview_only" default="false" doc="Collect 10 preview samples then exit"/>
+  <arg name="params_file"
+       default="$(find dataset_acquisition)/config/collection_params.yaml"/>
+
+  <!-- ── Gazebo + Otter USV ────────────────────────────────────────────────── -->
+  <!--
+    Reuse otter.launch with:
+      - open water world (no obstacles)
+      - minimal sensors (no lidar, no GPS — saves compute during data collection)
+      - ground truth enabled (for annotation)
+  -->
+  <include file="$(find otter_gazebo)/launch/otter.launch">
+    <arg name="world"                value="$(find dataset_acquisition)/worlds/open_water.world"/>
+    <arg name="gui"                  value="$(arg gui)"/>
+    <arg name="verbose"              value="$(arg verbose)"/>
+    <arg name="x"                    value="0.0"/>
+    <arg name="y"                    value="0.0"/>
+    <arg name="z"                    value="0.0"/>
+    <arg name="gps_enabled"          value="false"/>
+    <arg name="imu_enabled"          value="false"/>
+    <arg name="lidar_enabled"        value="false"/>
+    <arg name="velodyne_enabled"     value="false"/>
+    <arg name="top_camera_enabled"   value="false"/>
+    <arg name="ground_truth_enabled" value="true"/>
+  </include>
+
+  <!-- ── Overhead camera model ─────────────────────────────────────────────── -->
+  <!-- Process xacro URDF -->
+  <param name="overhead_cam_description"
+         command="$(find xacro)/xacro
+                  $(find dataset_acquisition)/urdf/overhead_camera.urdf.xacro"/>
+
+  <!-- Spawn at a safe initial position (above origin, out of scene) -->
+  <node name="overhead_cam_spawner" pkg="gazebo_ros" type="spawn_model"
+        respawn="false" output="screen"
+        args="-x 0 -y 0 -z 60
+              -R 0 -P 0 -Y 0
+              -urdf -param overhead_cam_description -model overhead_cam"/>
+
+  <!-- ── Dataset collection node ───────────────────────────────────────────── -->
+  <node name="collect_dataset" pkg="dataset_acquisition" type="collect_dataset.py"
+        output="screen" required="true">
+    <param name="params_file"  value="$(arg params_file)"/>
+    <param name="preview_only" value="$(arg preview_only)"/>
+    <!-- dataset_dir resolved to package share at runtime if left empty -->
+    <param name="dataset_dir"  value=""/>
+  </node>
+
+</launch>

@@ -1,0 +1,48 @@
+# ── otter_usv_detector configuration ─────────────────────────────────────────
+
+# Absolute path to the trained YOLO OBB weights file.
+model_path: "/home/t-thanh/Garage/uav_usv_sim/src/dataset_acquisition/runs/obb/Nested_Otter_YOLO2/weights/best.pt"
+
+# ROS topics
+image_topic:      "/overhead_cam/image_raw"   # input  — sensor_msgs/Image
+detection_topic:  "/usv_detection/result"     # output — ObbDetectionArray
+viz_topic:        "/usv_detection/image"      # output — sensor_msgs/Image (annotated)
+
+# Inference settings
+conf_threshold:  0.35    # minimum confidence to publish a detection
+iou_threshold:   0.45    # NMS IoU threshold
+imgsz:           960     # must match training resolution
+device:          "0"     # "0" for GPU 0, "cpu" for CPU-only
+
+# Visualisation
+publish_viz:     true    # publish annotated image on viz_topic
+viz_line_width:  2       # OBB polygon line thickness in pixels
+
+# ── Pose estimator (yolo_pose_estimator_node.py) ──────────────────────────────
+# These are loaded by pose_validation.launch via <param> overrides;
+# the node reads them as private (~) parameters.
+pose_estimator:
+
+  # UAV / USV identification
+  gimbal_ns:       "uav1"   # drone namespace — topics become /uav1/overhead_cam/...
+  usv_model_name:  "otter"  # Gazebo model name for ground-truth lookup
+
+  # Detection input
+  detection_topic: "/usv_detection/result"
+
+  # Gimbal mount offset from drone FCU in drone body frame [m]
+  # Must match gimbal_position_node.py x/y/z_offset params.
+  base_x_offset:  0.10
+  base_y_offset:  0.00
+  base_z_offset:  0.00
+
+  # PnP quality filters
+  conf_threshold:    0.50   # minimum OBB detection confidence to attempt PnP
+  max_reproj_err_px: 25.0   # reject if mean reprojection error exceeds this [px]
+  altitude_tol_m:     5.0   # cyclic-assignment: max |cam_z − drone_z| [m]
+
+  # Camera intrinsics fallback (overridden by camera_info topic when available)
+  # Values match FLIR Hadron 640R EO lens used on Gremsy G-Hadron.
+  hfov_deg:     67.0
+  image_width:   924
+  image_height:  690

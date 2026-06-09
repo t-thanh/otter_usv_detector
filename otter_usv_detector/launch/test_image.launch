@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!--
+  test_image.launch
+  ─────────────────
+  Self-contained offline test:
+    1. image_publisher_node  — streams one dataset image as /overhead_cam/image_raw
+    2. otter_usv_detector    — runs YOLO OBB inference on that stream
+
+  No Gazebo or real camera needed.
+
+  Usage
+  ─────
+    # Single image:
+    roslaunch otter_usv_detector test_image.launch \
+        image_path:=/path/to/image.jpg
+
+    # Whole test split (loops through all images):
+    roslaunch otter_usv_detector test_image.launch \
+        image_path:=$(find otter_usv_detector)/../dataset_acquisition/dataset_gimbal/images/test
+
+    # Default: uses first test-split image bundled with the package
+    roslaunch otter_usv_detector test_image.launch
+-->
+<launch>
+
+  <!-- ── Arguments ─────────────────────────────────────────────────────── -->
+  <arg name="image_path"
+       default="/home/t-thanh/Garage/uav_usv_sim/src/dataset_acquisition/dataset_gimbal/images/test"/>
+  <arg name="rate_hz"       default="5.0"/>
+  <arg name="loop"          default="true"/>
+  <arg name="device"        default="0"/>
+  <arg name="conf"          default="0.35"/>
+  <arg name="publish_viz"   default="true"/>
+  <arg name="config_file"
+       default="$(find otter_usv_detector)/config/detector.yaml"/>
+
+  <!-- ── 1. Image publisher (simulates camera) ─────────────────────────── -->
+  <node name="image_publisher"
+        pkg="otter_usv_detector"
+        type="image_publisher_node.py"
+        output="screen">
+    <param name="image_path"  value="$(arg image_path)"/>
+    <param name="topic"       value="/overhead_cam/image_raw"/>
+    <param name="rate_hz"     value="$(arg rate_hz)"/>
+    <param name="frame_id"    value="overhead_cam_optical"/>
+    <param name="loop"        value="$(arg loop)"/>
+  </node>
+
+  <!-- ── 2. YOLO OBB detector ──────────────────────────────────────────── -->
+  <node name="otter_usv_detector"
+        pkg="otter_usv_detector"
+        type="detector_node.py"
+        output="screen"
+        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+    <rosparam file="$(arg config_file)" command="load"/>
+    <param name="device"         value="$(arg device)"/>
+    <param name="conf_threshold" value="$(arg conf)"/>
+    <param name="publish_viz"    value="$(arg publish_viz)"/>
+  </node>
+
+</launch>

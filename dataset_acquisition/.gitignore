@@ -1,0 +1,7 @@
+# Collected dataset (can be large — store externally or in Git LFS)
+dataset/images/
+dataset/labels/
+dataset/preview/
+dataset/_tmp/
+dataset/verify_out/
+dataset/*.yaml

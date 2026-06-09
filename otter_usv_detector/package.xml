@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>otter_usv_detector</name>
+  <version>0.1.0</version>
+  <description>
+    YOLO OBB detector for the Otter USV using a downward-looking UAV camera.
+    Adapted from https://github.com/qq44642754a/Yolov8_ros to support
+    Oriented Bounding Box (OBB) output from Ultralytics YOLOv8/v11-OBB models.
+  </description>
+  <maintainer email="nttputus@gmail.com">t-thanh</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>gazebo_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+</package>

@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  aruco_pose_test.launch
+  ───────────────────────
+  Tests nested fiducial marker detection and pose estimation from the Hadron gimbal camera.
+
+  Detects two markers on the Target_2_board texture on the Otter USV:
+    Outer: DICT_APRILTAG_36h11 ID=10  (2.000 m physical side)  — drawn in green
+    Inner: DICT_4X4_50         ID=1   (0.200 m physical side)  — drawn in orange
+
+  Pose is estimated via solvePnP and compared against Gazebo ground truth.
+
+  Prerequisites (must already be running):
+    roslaunch otter_gazebo usv_uav_gimbal.launch
+    roslaunch uav_gimbal  gimbal_controllers.launch   (or start_uav_gimbal_tracker.launch)
+    UAV must be airborne and gimbal pointed roughly at the USV
+
+  Usage:
+    roslaunch otter_usv_detector aruco_pose_test.launch
+    roslaunch otter_usv_detector aruco_pose_test.launch ns:=uav1 show_image:=true
+
+  Key outputs (inspect with rostopic echo):
+    /aruco_test/image        — annotated image (view in rqt_image_view)
+    /aruco_test/outer/pose   — estimated outer (AprilTag) world position
+    /aruco_test/inner/pose   — estimated inner (ArUco) world position
+    /aruco_test/error        — (x=xy_err, y=z_err, z=3d_err) in metres
+-->
+<launch>
+
+  <arg name="ns"           default="uav1"/>
+  <arg name="usv_model"    default="otter"/>
+  <arg name="show_image"   default="true"/>
+
+  <!-- ── ArUco pose test node ─────────────────────────────────────────────── -->
+  <node name="aruco_pose_test"
+        pkg="otter_usv_detector"
+        type="aruco_pose_test_node.py"
+        output="screen">
+
+    <param name="gimbal_ns"          value="$(arg ns)"/>
+    <param name="usv_model_name"     value="$(arg usv_model)"/>
+
+    <!-- Inner ArUco (DICT_4X4_50 ID=1) physical size [m] = 200px / 2500px × 2.5m panel -->
+    <param name="inner_marker_size_m" value="0.2"/>
+    <!-- Outer AprilTag (DICT_APRILTAG_36h11 ID=10) physical size [m] = 2000px / 2500px × 2.5m panel -->
+    <param name="outer_marker_size_m" value="2.0"/>
+
+    <!-- Gimbal base offset from FCU in drone body frame [m] -->
+    <param name="base_x_offset"      value="0.10"/>
+    <param name="base_y_offset"      value="0.00"/>
+    <param name="base_z_offset"      value="0.00"/>
+
+  </node>
+
+  <!-- ── Optional image viewer ─────────────────────────────────────────────── -->
+  <group if="$(arg show_image)">
+    <node name="aruco_image_view"
+          pkg="rqt_image_view"
+          type="rqt_image_view"
+          args="/aruco_test/image"/>
+  </group>
+
+</launch>

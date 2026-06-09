@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<!--
+  x500_visual.urdf.xacro
+  ──────────────────────
+  Visual-only representation of the MRS X500 quadrotor for dataset collection.
+  No physics, no sensors, no controllers — purely for visual context in camera
+  images (frame, arms, and legs visible when camera is close to the drone).
+
+  Geometry matches the real X500v2 proportions:
+    Body plate  : 250 × 250 × 55 mm (top + bottom boards)
+    Arm span    : ±185 mm along +X/+Y from centre
+    Arms        : 35 × 350 × 18 mm cross-shaped
+    Motor pods  : ∅60 × 35 mm cylinders at arm tips
+    Props       : ∅330 × 6 mm discs
+    Legs        : ∅15 × 165 mm tubes at arm tips, angled outward and down
+
+  Teleported as a whole via /gazebo/set_model_state (base_link = drone world pose).
+  base_link origin matches the X500 base_link used in MRS simulation.
+-->
+<robot name="x500_visual" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="M_PI" value="3.14159265358979"/>
+
+  <!-- ── Material colours ────────────────────────────────────────────────── -->
+  <material name="carbon_dark">  <color rgba="0.12 0.12 0.12 1.0"/></material>
+  <material name="carbon_light"> <color rgba="0.22 0.22 0.22 1.0"/></material>
+  <material name="blue_plastic"> <color rgba="0.20 0.35 0.65 1.0"/></material>
+  <material name="red_plastic">  <color rgba="0.75 0.10 0.10 1.0"/></material>
+  <material name="prop_black">   <color rgba="0.08 0.08 0.08 0.85"/></material>
+
+  <!-- ── Base link (drone body) ───────────────────────────────────────────── -->
+  <link name="base_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+
+    <!-- Top carbon plate -->
+    <visual>
+      <origin xyz="0 0 0.028" rpy="0 0 ${M_PI/4}"/>
+      <geometry><box size="0.250 0.250 0.008"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <!-- Bottom carbon plate -->
+    <visual>
+      <origin xyz="0 0 -0.020" rpy="0 0 ${M_PI/4}"/>
+      <geometry><box size="0.200 0.200 0.008"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <!-- Central standoff stack -->
+    <visual>
+      <origin xyz="0 0 0.004" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.040" length="0.055"/></geometry>
+      <material name="carbon_light"/>
+    </visual>
+
+    <!-- ── Arms — cross layout (+X, +Y, -X, -Y) ─────────────────────────── -->
+    <!-- X-axis arm -->
+    <visual>
+      <origin xyz="0 0 0.018" rpy="0 0 0"/>
+      <geometry><box size="0.370 0.030 0.018"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <!-- Y-axis arm -->
+    <visual>
+      <origin xyz="0 0 0.018" rpy="0 0 ${M_PI/2}"/>
+      <geometry><box size="0.370 0.030 0.018"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+
+    <!-- ── Arm-tip motor pods (∅60 × 35 mm) ──────────────────────────────── -->
+    <!-- +X motor -->
+    <visual>
+      <origin xyz=" 0.185 0 0.030" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.030" length="0.035"/></geometry>
+      <material name="carbon_light"/>
+    </visual>
+    <!-- -X motor -->
+    <visual>
+      <origin xyz="-0.185 0 0.030" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.030" length="0.035"/></geometry>
+      <material name="carbon_light"/>
+    </visual>
+    <!-- +Y motor -->
+    <visual>
+      <origin xyz="0  0.185 0.030" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.030" length="0.035"/></geometry>
+      <material name="carbon_light"/>
+    </visual>
+    <!-- -Y motor -->
+    <visual>
+      <origin xyz="0 -0.185 0.030" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.030" length="0.035"/></geometry>
+      <material name="carbon_light"/>
+    </visual>
+
+    <!-- ── Propeller discs (∅330 × 6 mm) — give visual cue of rotor span ── -->
+    <!-- +X prop -->
+    <visual>
+      <origin xyz=" 0.185 0 0.054" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.006"/></geometry>
+      <material name="prop_black"/>
+    </visual>
+    <!-- -X prop -->
+    <visual>
+      <origin xyz="-0.185 0 0.054" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.006"/></geometry>
+      <material name="prop_black"/>
+    </visual>
+    <!-- +Y prop -->
+    <visual>
+      <origin xyz="0  0.185 0.054" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.006"/></geometry>
+      <material name="prop_black"/>
+    </visual>
+    <!-- -Y prop -->
+    <visual>
+      <origin xyz="0 -0.185 0.054" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.165" length="0.006"/></geometry>
+      <material name="prop_black"/>
+    </visual>
+
+    <!-- ── Landing legs (∅15 × 165 mm tubes, one per arm tip) ─────────────
+         The real X500 legs angle outward and downward from the arm tip.
+         We approximate: vertical cylinder centred 20 mm outward from tip.
+         Bottom of leg sits at z ≈ −0.15 m (well below drone body). ──────── -->
+    <!-- +X leg (front, black) -->
+    <visual>
+      <origin xyz=" 0.205 0 -0.060" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.165"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <!-- -X leg (back, red — matches X500 colour coding) -->
+    <visual>
+      <origin xyz="-0.205 0 -0.060" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.165"/></geometry>
+      <material name="red_plastic"/>
+    </visual>
+    <!-- +Y leg (front-left, black) -->
+    <visual>
+      <origin xyz="0  0.205 -0.060" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.165"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <!-- -Y leg (back-right, red) -->
+    <visual>
+      <origin xyz="0 -0.205 -0.060" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.165"/></geometry>
+      <material name="red_plastic"/>
+    </visual>
+
+    <!-- ── Leg foot pads (small cylinders at leg bases) ───────────────────── -->
+    <visual>
+      <origin xyz=" 0.205 0 -0.143" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.014" length="0.012"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.205 0 -0.143" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.014" length="0.012"/></geometry>
+      <material name="red_plastic"/>
+    </visual>
+    <visual>
+      <origin xyz="0  0.205 -0.143" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.014" length="0.012"/></geometry>
+      <material name="carbon_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.205 -0.143" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.014" length="0.012"/></geometry>
+      <material name="red_plastic"/>
+    </visual>
+
+  </link>
+
+  <!-- Make base_link static in Gazebo (no gravity, teleportable via set_model_state) -->
+  <gazebo reference="base_link">
+    <static>true</static>
+    <turnGravityOff>true</turnGravityOff>
+  </gazebo>
+
+</robot>

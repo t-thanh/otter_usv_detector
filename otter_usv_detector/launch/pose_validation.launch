@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!--
+  pose_validation.launch
+  ───────────────────────
+  Validation scenario for comparing YOLO OBB pose estimation vs.
+  ArUco-based pose estimation vs. Gazebo ground truth.
+
+  Scenario
+  ────────
+    • Otter USV at world origin (0, 0, 0).
+    • 2 × 2 × 1 m concrete platform at (5, 0, 0)  — top face at z = 1 m.
+    • X500 UAV spawned on top of the platform at (5, 0, 2).
+    • Gimbal auto-commands nadir pitch (−π/2) after 12 s warm-up.
+    • UAV is ~5 m from USV, so once it climbs to ~8 m the USV falls into the
+      gimbal camera FOV and both pose estimators engage.
+
+  After launch — operator procedure
+  ──────────────────────────────────
+    1. Wait for "Gimbal nadir command sent" in terminal.
+    2. Arm + take off:
+         roslaunch otter_gazebo start_uav.launch
+       Or use MRS shell aliases:
+         mrs arm   → mrs takeoff  (in the uav1 tmux session)
+    3. Fly to 8 m:
+         rosservice call /uav1/control_manager/goto "goal: [0, 0, 10.0, 0.0]"
+       Or through the MRS goal interface.
+
+  Key output topics
+  ─────────────────
+    /yolo_pose/uav_in_usv     — YOLO OBB estimated UAV pose in USV frame
+    /yolo_pose/gt_uav_in_usv  — Ground-truth UAV pose in USV frame
+    /yolo_pose/error          — (x=xy_err, y=z_err, z=3d_err) [m]
+    /aruco_test/error         — same format from ArUco estimator
+    /yolo_pose/image          — debug annotated image (detected + reprojected corners)
+    /aruco_test/image         — debug annotated image from ArUco node
+
+  Compare live with:
+    rostopic echo /yolo_pose/error
+    rostopic echo /aruco_test/error
+    rqt_image_view /yolo_pose/image
+    rqt_image_view /aruco_test/image
+-->
+<launch>
+
+  <!-- ── World / Gazebo options ─────────────────────────────────────────────── -->
+  <arg name="world"   default="$(find usv_worlds)/worlds/usv_uav.world"/>
+  <arg name="gui"     default="true"/>
+  <arg name="verbose" default="false"/>
+
+  <!-- ── UAV / USV identifiers ─────────────────────────────────────────────── -->
+  <arg name="UAV_NUMBER" value="1"/>
+  <arg name="UAV_NAME"   value="uav$(arg UAV_NUMBER)"/>
+
+  <!-- ── Kill any previous Gazebo / PX4 / MAVROS session ───────────────────── -->
+  <node pkg="mrs_simulation" type="kill_previous_session.sh"
+        name="kill_previous_session" output="screen"/>
+
+  <!-- ── MRS drone spawner service ─────────────────────────────────────────── -->
+  <include file="$(find mrs_simulation)/launch/mrs_drone_spawner.launch"/>
+
+  <!-- ── Start Gazebo ───────────────────────────────────────────────────────── -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name"   value="$(arg world)"/>
+    <arg name="verbose"      value="$(arg verbose)"/>
+    <arg name="paused"       value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui"          value="$(arg gui)"/>
+  </include>
+
+  <!-- Silence the per-call INFO flood from gazebo_ros_api_plugin -->
+  <node name="gz_logger_suppress" pkg="rosservice" type="rosservice"
+        args="call --wait /gazebo/set_logger_level '{logger: ros.gazebo_ros, level: warn}'"
+        output="log"/>
+
+  <!-- ── Spawn Otter USV at world origin ───────────────────────────────────── -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro
+                  $(find otter_gazebo)/urdf/otter_gazebo.urdf.xacro
+                  imu_enabled:=true
+                  gps_enabled:=true
+                  lidar_enabled:=false
+                  velodyne_enabled:=false
+                  top_camera_enabled:=false
+                  ground_truth_enabled:=true
+                  direct_control_plugin:=false"/>
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        respawn="false" output="screen"
+        args="-x 0 -y 0 -z 0 -urdf -param /robot_description -model otter"/>
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="rob_st_pub"/>
+
+  <!-- ── Spawn validation platform (static box, top at z=1, at x=5) ────────── -->
+  <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
+        args="-file $(find otter_usv_detector)/models/validation_platform.sdf
+              -sdf -model validation_platform -x 0.0 -y 0.0 -z 0.0"
+        output="screen"/>
+
+  <!-- ── Spawn X500 UAV on top of the platform ─────────────────────────────── -->
+  <!--  Platform top face is at z=1; UAV body spawns 1 m above the surface      -->
+  <!--  (same clearance as the standard <pos 0 0 1 0> on flat ground).           -->
+  <node pkg="rosservice" type="rosservice" name="spawn_drone"
+        args="call --wait /mrs_drone_spawner/spawn
+              '$(arg UAV_NUMBER) x500 --enable-rangefinder --enable-ground-truth --pos 5 0 2 0'"/>
+
+  <!-- ── Spawn standalone gimbal model ─────────────────────────────────────── -->
+  <node name="spawn_gimbal" pkg="gazebo_ros" type="spawn_model"
+        args="-file $(find uav_gimbal)/models/gimbal_ghadron_standalone/model.sdf
+              -sdf -model uav1_gimbal -x 5.0 -y 0.0 -z 2.0"
+        output="screen"/>
+
+  <!-- ── Gimbal position controller ────────────────────────────────────────── -->
+  <include file="$(find uav_gimbal)/launch/gimbal_controllers.launch">
+    <arg name="ns" value="$(arg UAV_NAME)"/>
+  </include>
+
+  <!-- ── Auto-send nadir gimbal command after 12 s warm-up ─────────────────── -->
+  <!--  Camera will point straight down (pitch=−π/2) so USV enters FOV as       -->
+  <!--  soon as the UAV climbs above ~6 m at 5 m horizontal offset.             -->
+  <node name="gimbal_nadir_cmd" pkg="otter_usv_detector" type="gimbal_nadir_cmd.py"
+        output="screen">
+    <param name="ns"      value="$(arg UAV_NAME)"/>
+    <param name="delay_s" value="12.0"/>
+  </node>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       POSE ESTIMATORS
+       ══════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- ── YOLO OBB detector (requires yolo_training conda env + GPU) ────────── -->
+  <!--  Uses run_detector.sh wrapper so ultralytics is available without conda   -->
+  <!--  activate; image_topic remapped to the UAV gimbal camera.                 -->
+  <node name="otter_usv_detector"
+        pkg="otter_usv_detector"
+        type="detector_node.py"
+        output="screen"
+        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+
+    <rosparam file="$(find otter_usv_detector)/config/detector.yaml" command="load"/>
+    <!-- Override image topic to UAV gimbal camera; keep other defaults -->
+    <param name="image_topic"  value="/$(arg UAV_NAME)/overhead_cam/image_raw"/>
+    <param name="publish_viz"  value="true"/>
+  </node>
+
+  <!-- ── YOLO OBB pose estimator ───────────────────────────────────────────── -->
+  <node name="yolo_pose_estimator"
+        pkg="otter_usv_detector"
+        type="yolo_pose_estimator_node.py"
+        output="screen">
+
+    <param name="gimbal_ns"       value="$(arg UAV_NAME)"/>
+    <param name="usv_model_name"  value="otter"/>
+    <param name="detection_topic" value="/usv_detection/result"/>
+
+    <!-- Gimbal base offset: must match gimbal_position_node.py params -->
+    <param name="base_x_offset"   value="0.10"/>
+    <param name="base_y_offset"   value="0.00"/>
+    <param name="base_z_offset"   value="0.00"/>
+
+    <!-- Pose quality filters -->
+    <param name="conf_threshold"    value="0.50"/>
+    <param name="max_reproj_err_px" value="25.0"/>
+    <param name="altitude_tol_m"    value="5.0"/>
+
+    <!-- Camera intrinsics fallback (overridden by camera_info if published) -->
+    <param name="hfov_deg"    value="67.0"/>
+    <param name="image_width" value="924"/>
+    <param name="image_height" value="690"/>
+  </node>
+
+  <!-- ── ArUco / AprilTag pose estimator (reference comparison) ────────────── -->
+  <node name="aruco_pose_test"
+        pkg="otter_usv_detector"
+        type="aruco_pose_test_node.py"
+        output="screen">
+
+    <param name="gimbal_ns"            value="$(arg UAV_NAME)"/>
+    <param name="usv_model_name"       value="otter"/>
+    <param name="marker_size_m"        value="0.2"/>
+    <param name="outer_marker_size_m"  value="2.0"/>
+    <param name="base_x_offset"        value="0.10"/>
+    <param name="base_y_offset"        value="0.00"/>
+    <param name="base_z_offset"        value="0.00"/>
+  </node>
+
+  <!-- ── Optional rqt image views (comment-in as needed) ───────────────────── -->
+  <!--
+  <node name="yolo_image_view"  pkg="rqt_image_view" type="rqt_image_view"
+        args="/yolo_pose/image"/>
+  <node name="aruco_image_view" pkg="rqt_image_view" type="rqt_image_view"
+        args="/aruco_test/image"/>
+  -->
+
+</launch>

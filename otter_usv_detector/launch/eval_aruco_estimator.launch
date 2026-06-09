@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!--
+  eval_aruco_estimator.launch
+  ────────────────────────────
+  Offline full-pose evaluation of the nested ArUco / AprilTag pose estimator.
+  No Gazebo or physical UAV required.
+
+  Pipeline
+  ────────
+    eval_aruco_driver  ──image──►  aruco_pose_estimator
+         │  (publishes synthetic Odometry, JointState,        │
+         │   CameraInfo per sample)                           │
+         │                                                    ▼
+         │        /aruco_pose/outer/usv_in_cam  (PoseStamped)
+         └──────  /aruco_pose/inner/usv_in_cam  (PoseStamped)
+                  compared to saved ground truth → errors logged
+
+  Two markers evaluated independently
+  ────────────────────────────────────
+    outer  DICT_APRILTAG_36h11  ID=10  size=2.000 m
+           Detectable at long range (20–70 m altitude).
+    inner  DICT_4X4_50          ID=1   size=0.200 m
+           Only detectable at short range (≤ ~10 m).
+
+  Reported metrics (per marker, per sample + aggregate mean/std/max/median)
+  ──────────────────────────────────────────────────────────────────────────
+    ex, ey, ez  [m]   position components in camera optical frame
+    e_lat       [m]   lateral error √(ex²+ey²)
+    e_3d        [m]   full 3-D Euclidean position error
+    e_dist      [m]   error in camera-to-marker range
+    e_roll, e_pitch, e_yaw  [°]   orientation errors
+                              (includes fixed marker→USV frame offset)
+
+  Steps
+  ─────
+    1. Collect test samples once (shared with YOLO eval):
+         roslaunch otter_usv_detector collect_test_samples.launch
+    2. Run evaluation (no Gazebo needed):
+         roslaunch otter_usv_detector eval_aruco_estimator.launch
+    3. Results are printed to console and saved to:
+         <test_samples_dir>/eval_aruco_results.yaml
+
+  Arguments
+  ─────────
+    test_samples_dir  path to test_samples (default: pkg/test_samples)
+    ns                UAV namespace, must match collect step (default: uav1)
+    detect_timeout_s  max seconds to wait per sample for a pose (default: 5.0)
+-->
+<launch>
+
+  <!-- ── Arguments ─────────────────────────────────────────────────────────── -->
+  <arg name="test_samples_dir" default=""     doc="Path to test_samples dir (empty=pkg default)"/>
+  <arg name="ns"               default="uav1" doc="UAV namespace (must match collect step)"/>
+  <arg name="detect_timeout_s" default="5.0"  doc="Seconds to wait per sample for a pose"/>
+
+  <!-- ── 1. ArUco / AprilTag pose estimator ────────────────────────────────── -->
+  <!--
+    Subscribes to:
+      /<ns>/overhead_cam/image_raw     (published by eval_aruco_driver)
+      /<ns>/overhead_cam/camera_info
+      /<ns>/ground_truth               (synthetic Odometry)
+      /<ns>/gimbal/joint_states        (synthetic JointState)
+    Publishes:
+      /aruco_pose/outer/usv_in_cam     PoseStamped — outer AprilTag 36h11 (ID=10)
+      /aruco_pose/inner/usv_in_cam     PoseStamped — inner ArUco 4×4_50   (ID=1)
+  -->
+  <node name="aruco_pose_estimator"
+        pkg="otter_usv_detector"
+        type="aruco_pose_estimator_node.py"
+        output="screen">
+    <param name="gimbal_ns"      value="$(arg ns)"/>
+    <param name="base_x_offset"  value="0.10"/>
+    <param name="base_y_offset"  value="0.00"/>
+    <param name="base_z_offset"  value="0.00"/>
+    <!-- Physical marker sizes (must match URDF texture resolution) -->
+    <param name="outer_size_m"   value="2.0"/>
+    <param name="inner_size_m"   value="0.2"/>
+  </node>
+
+  <!-- ── 2. Evaluation driver ──────────────────────────────────────────────── -->
+  <!--
+    Replays test_samples one by one, publishing synthetic drone + gimbal state.
+    Waits for both marker pose topics after each image, then computes errors.
+    Results saved to <test_samples_dir>/eval_aruco_results.yaml on completion.
+  -->
+  <node name="eval_aruco_driver_node"
+        pkg="otter_usv_detector"
+        type="eval_aruco_driver_node.py"
+        output="screen"
+        required="true">
+    <param name="ns"               value="$(arg ns)"/>
+    <param name="test_samples_dir" value="$(arg test_samples_dir)"/>
+    <param name="detect_timeout_s" value="$(arg detect_timeout_s)"/>
+  </node>
+
+</launch>

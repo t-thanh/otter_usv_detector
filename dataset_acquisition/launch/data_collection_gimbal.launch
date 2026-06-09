@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<launch>
+  <!--
+    data_collection_gimbal.launch
+    ──────────────────────────────
+    YOLO OBB dataset collection simulating the Gremsy G-Hadron gimbal camera.
+
+    World: usv_uav_collect.world — copy of the real test environment
+    (usv_uav.world) with the MRS UAV-specific world plugins removed.
+    Ocean, sky, sun, and ground plane are identical to the simulation.
+
+    Models
+    ──────
+      overhead_cam  — virtual camera (FLIR Hadron 640R spec); teleported to the
+                      FK-computed optical pose before each capture.
+      x500_visual   — visual-only X500 drone body; spawned underground at
+                      z=-50 and raised to drone_pos only during HN-A
+                      (deck-level hard-negative) samples so arms and legs
+                      appear naturally in the camera frame.
+
+    Modes
+    ─────
+      mode:=all           (default) Collect positives + hard negatives
+      mode:=positive       Positives only
+      mode:=hard_negative  Hard negatives only
+
+    Preview
+    ───────
+      preview_only:=true   Collect the structured preview grid and exit.
+                           Check dataset_gimbal/preview/ for annotated images.
+                           HN-A preview samples will show the X500 drone body.
+
+    Usage
+    ─────
+      roslaunch dataset_acquisition data_collection_gimbal.launch
+      roslaunch dataset_acquisition data_collection_gimbal.launch preview_only:=true
+      roslaunch dataset_acquisition data_collection_gimbal.launch mode:=positive
+  -->
+
+  <!-- ── Arguments ─────────────────────────────────────────────────────────── -->
+  <arg name="gui"          default="true"   doc="Show Gazebo GUI"/>
+  <arg name="verbose"      default="false"  doc="Verbose Gazebo output"/>
+  <arg name="preview_only" default="false"  doc="Collect preview grid only, then exit"/>
+  <arg name="mode"         default="all"    doc="positive | hard_negative | all"/>
+  <arg name="params_file"
+       default="$(find dataset_acquisition)/config/collection_params_gimbal.yaml"/>
+
+  <!-- ── Gazebo + Otter USV ────────────────────────────────────────────────── -->
+  <!--
+    World: usv_uav_collect.world — same ocean, sky, sun and physics as the
+    real test environment (usv_uav.world), without MRS UAV-specific plugins.
+    USV spawned at origin, stays fixed throughout collection.
+  -->
+  <include file="$(find otter_gazebo)/launch/otter.launch">
+    <arg name="world"                value="$(find dataset_acquisition)/worlds/usv_uav_collect.world"/>
+    <arg name="gui"                  value="$(arg gui)"/>
+    <arg name="verbose"              value="$(arg verbose)"/>
+    <arg name="x"                    value="0.0"/>
+    <arg name="y"                    value="0.0"/>
+    <arg name="z"                    value="0.0"/>
+    <arg name="gps_enabled"          value="false"/>
+    <arg name="imu_enabled"          value="false"/>
+    <arg name="lidar_enabled"        value="false"/>
+    <arg name="velodyne_enabled"     value="false"/>
+    <arg name="top_camera_enabled"   value="false"/>
+    <arg name="ground_truth_enabled" value="true"/>
+  </include>
+
+  <!-- ── Virtual camera model ──────────────────────────────────────────────── -->
+  <!--
+    The overhead_cam URDF is a static model with the FLIR Hadron 640R EO spec
+    (924×690 px, 67° HFOV).  The collector teleports its base_link to the
+    pose that produces the FK optical frame in Gazebo:
+        R_base = R_opt · R_OPT⁻¹ · Ry(−π/2),  position = p_opt
+    Spawned at z=80 initially; moved before each capture.
+  -->
+  <param name="overhead_cam_description"
+         command="$(find xacro)/xacro
+                  $(find dataset_acquisition)/urdf/overhead_camera.urdf.xacro"/>
+
+  <node name="overhead_cam_spawner" pkg="gazebo_ros" type="spawn_model"
+        respawn="false" output="screen"
+        args="-x 0 -y 0 -z 80
+              -R 0 -P 0 -Y 0
+              -urdf -param overhead_cam_description -model overhead_cam"/>
+
+  <!-- ── Dataset collection node ───────────────────────────────────────────── -->
+  <node name="collect_dataset_gimbal" pkg="dataset_acquisition"
+        type="collect_dataset_gimbal.py"
+        output="screen" required="true">
+    <param name="params_file"  value="$(arg params_file)"/>
+    <param name="mode"         value="$(arg mode)"/>
+    <param name="preview_only" value="$(arg preview_only)"/>
+    <!-- dataset_dir resolved to <package>/dataset_gimbal at runtime if empty -->
+    <param name="dataset_dir"  value=""/>
+  </node>
+
+</launch>

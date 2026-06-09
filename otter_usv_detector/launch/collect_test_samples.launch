@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+  collect_test_samples.launch
+  ────────────────────────────
+  Collect deterministic ground-truth test samples for full-pose estimator
+  evaluation.  For each scenario in test_grid.yaml the collector:
+    1. Computes the gimbal FK → optical frame pose.
+    2. Teleports overhead_cam URDF so its optical frame matches the FK result.
+    3. Teleports the Otter USV to origin with the configured yaw.
+    4. Captures a Gazebo frame and verifies all AR-panel corners are in-FOV.
+    5. Saves the image + full 6-DOF ground truth (camera in USV frame).
+
+  Output
+  ──────
+    <output_dir>/images/sample_NNNN.jpg
+    <output_dir>/metadata.yaml
+
+  Usage
+  ─────
+    roslaunch otter_usv_detector collect_test_samples.launch
+    roslaunch otter_usv_detector collect_test_samples.launch gui:=false
+    roslaunch otter_usv_detector collect_test_samples.launch \
+        output_dir:=/tmp/eval_samples test_grid:=/path/to/custom_grid.yaml
+-->
+<launch>
+
+  <!-- ── Arguments ─────────────────────────────────────────────────────────── -->
+  <arg name="gui"        default="true"  doc="Show Gazebo GUI"/>
+  <arg name="verbose"    default="false" doc="Verbose Gazebo output"/>
+  <arg name="output_dir" default=""      doc="Where to save samples (empty=pkg/test_samples)"/>
+  <arg name="test_grid"  default=""      doc="Path to test_grid.yaml (empty=pkg/config default)"/>
+
+  <!-- ── Gazebo + Otter USV ────────────────────────────────────────────────── -->
+  <!--
+    Same world as gimbal dataset collection: ocean + sky, no MRS UAV plugins.
+    USV stays fixed at world origin; collector teleports it between yaw angles.
+  -->
+  <include file="$(find otter_gazebo)/launch/otter.launch">
+    <arg name="world"                value="$(find dataset_acquisition)/worlds/usv_uav_collect.world"/>
+    <arg name="gui"                  value="$(arg gui)"/>
+    <arg name="verbose"              value="$(arg verbose)"/>
+    <arg name="x"                    value="0.0"/>
+    <arg name="y"                    value="0.0"/>
+    <arg name="z"                    value="0.0"/>
+    <arg name="gps_enabled"          value="false"/>
+    <arg name="imu_enabled"          value="false"/>
+    <arg name="lidar_enabled"        value="false"/>
+    <arg name="velodyne_enabled"     value="false"/>
+    <arg name="top_camera_enabled"   value="false"/>
+    <arg name="ground_truth_enabled" value="true"/>
+  </include>
+
+  <!-- ── Virtual camera model ──────────────────────────────────────────────── -->
+  <!--
+    overhead_cam: FLIR Hadron 640R spec (924×690 px, 67° HFOV).
+    URDF chain: base_link -Ry(π/2)→ cam_link -R_OPT→ optical frame.
+    Collector teleports base_link so the optical frame matches the FK result:
+        R_base = R_opt · R_OPT⁻¹ · Ry(−π/2),   position = p_opt.
+    Spawned at z=80 (out of view) and moved before each capture.
+  -->
+  <param name="overhead_cam_description"
+         command="$(find xacro)/xacro
+                  $(find dataset_acquisition)/urdf/overhead_camera.urdf.xacro"/>
+
+  <node name="overhead_cam_spawner" pkg="gazebo_ros" type="spawn_model"
+        respawn="false" output="screen"
+        args="-x 0 -y 0 -z 80
+              -R 0 -P 0 -Y 0
+              -urdf -param overhead_cam_description -model overhead_cam"/>
+
+  <!-- ── Test sample collector ─────────────────────────────────────────────── -->
+  <node name="collect_test_samples" pkg="otter_usv_detector"
+        type="collect_test_samples.py" output="screen" required="true">
+    <param name="output_dir"     value="$(arg output_dir)"/>
+    <param name="test_grid_file" value="$(arg test_grid)"/>
+    <param name="image_format"   value="jpg"/>
+    <param name="jpeg_quality"   value="95"/>
+  </node>
+
+</launch>

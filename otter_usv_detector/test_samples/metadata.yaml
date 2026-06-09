@@ -1,0 +1,817 @@
+samples:
+- drone_pos:
+  - 0.0
+  - 0.0
+  - 5.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.5707963267948966
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - 0.1
+  - 0.0
+  - 4.894999999999999
+  gt_dist_m: 4.896021343907724
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 0.0
+  image_file: sample_0000.jpg
+  label: alt_05
+  sample_id: 0
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  usv_yaw_deg: 0.0
+- drone_pos:
+  - 0.0
+  - 0.0
+  - 10.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.5707963267948966
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - 0.07071067811865475
+  - -0.07071067811865477
+  - 9.895
+  gt_dist_m: 9.895505292808448
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -45.00000000000001
+  image_file: sample_0001.jpg
+  label: alt_10
+  sample_id: 1
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.3826834323650898
+  - 0.9238795325112867
+  usv_yaw_deg: 45.0
+- drone_pos:
+  - 0.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.5707963267948966
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - 2.2204460492503132e-17
+  - -0.1
+  - 19.895000000000003
+  gt_dist_m: 19.895251317839644
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -89.99999999999999
+  image_file: sample_0002.jpg
+  label: alt_20
+  sample_id: 2
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865475
+  - 0.7071067811865476
+  usv_yaw_deg: 90.0
+- drone_pos:
+  - 0.0
+  - 0.0
+  - 30.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.5707963267948966
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - -0.07071067811865475
+  - -0.07071067811865477
+  - 29.895000000000003
+  gt_dist_m: 29.895167251580986
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -135.0
+  image_file: sample_0003.jpg
+  label: alt_30
+  sample_id: 3
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.9238795325112867
+  - 0.38268343236508984
+  usv_yaw_deg: 135.0
+- drone_pos:
+  - 0.0
+  - 0.0
+  - 50.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.5707963267948966
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - -0.1
+  - -1.2246467991473533e-17
+  - 49.895
+  gt_dist_m: 49.8951002103413
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -180.0
+  image_file: sample_0004.jpg
+  label: alt_50
+  sample_id: 4
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 1.0
+  - 6.123233995736766e-17
+  usv_yaw_deg: 180.0
+- drone_pos:
+  - 0.0
+  - 0.0
+  - 70.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.5707963267948966
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - -0.07071067811865475
+  - 0.07071067811865475
+  - 69.89499999999998
+  gt_dist_m: 69.89507153583861
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 135.0
+  image_file: sample_0005.jpg
+  label: alt_70
+  sample_id: 5
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.9238795325112867
+  - -0.3826834323650897
+  usv_yaw_deg: 225.0
+- drone_pos:
+  - 5.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.3264502315156905
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 5.093951952610008
+  - 7.406721877244828e-19
+  - 19.8957426068431
+  gt_dist_m: 20.537500343840563
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 0.0
+  image_file: sample_0006.jpg
+  label: rng_05m
+  sample_id: 6
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  usv_yaw_deg: 0.0
+- drone_pos:
+  - 10.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.106538745764405
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 8.737162309601738
+  - -5.044403011402014
+  - 19.89764614407902
+  gt_dist_m: 22.30919830564849
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -29.999999999999996
+  image_file: sample_0007.jpg
+  label: rng_10m
+  sample_id: 7
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.25881904510252074
+  - 0.9659258262890683
+  usv_yaw_deg: 29.999999999999996
+- drone_pos:
+  - 15.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.9267698328089891
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 7.542494747183429
+  - -13.063984117943066
+  - 19.900007883537825
+  gt_dist_m: 24.971327994522557
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -59.99999999999999
+  image_file: sample_0008.jpg
+  label: rng_15m
+  sample_id: 8
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.49999999999999994
+  - 0.8660254037844387
+  usv_yaw_deg: 59.99999999999999
+- drone_pos:
+  - 20.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.7853981633974483
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 4.461336217987008e-15
+  - -20.082322330470337
+  - 19.902322330470337
+  gt_dist_m: 28.273699869858664
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -89.99999999999999
+  image_file: sample_0009.jpg
+  label: rng_20m
+  sample_id: 9
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865475
+  - 0.7071067811865476
+  usv_yaw_deg: 90.0
+- drone_pos:
+  - 25.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.6754424205218056
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - -12.540244619908266
+  - -21.720340821023395
+  - 19.90436893359161
+  gt_dist_m: 32.01897629770634
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -119.99999999999999
+  image_file: sample_0010.jpg
+  label: rng_25m
+  sample_id: 10
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.8660254037844386
+  - 0.5000000000000001
+  usv_yaw_deg: 119.99999999999999
+- drone_pos:
+  - 15.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.9267698328089891
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 15.084989494366852
+  - 1.8382567677216913e-18
+  - 19.900007883537825
+  gt_dist_m: 24.971327994522557
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 0.0
+  image_file: sample_0011.jpg
+  label: dir_pX
+  sample_id: 11
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  usv_yaw_deg: 0.0
+- drone_pos:
+  - 0.0
+  - 15.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.9267698328089891
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 4.71238898038469
+  gt_cam_in_usv:
+  - 10.66669836559463
+  - 10.52527700935732
+  - 19.900007883537825
+  gt_dist_m: 24.911246936096003
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -45.00000000000001
+  image_file: sample_0012.jpg
+  label: dir_pY
+  sample_id: 12
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.3826834323650898
+  - 0.9238795325112867
+  usv_yaw_deg: 45.0
+- drone_pos:
+  - -15.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.9267698328089891
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - -3.3051316115899293e-15
+  - 14.884989494366852
+  - 19.900007883537825
+  gt_dist_m: 24.851020623151058
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -89.99999999999999
+  image_file: sample_0013.jpg
+  label: dir_nX
+  sample_id: 13
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865475
+  - 0.7071067811865476
+  usv_yaw_deg: 90.0
+- drone_pos:
+  - 0.0
+  - -15.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.9267698328089891
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 1.5707963267948966
+  gt_cam_in_usv:
+  - -10.666698365594632
+  - 10.52527700935732
+  - 19.900007883537825
+  gt_dist_m: 24.911246936096003
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -135.0
+  image_file: sample_0014.jpg
+  label: dir_nY
+  sample_id: 14
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.9238795325112867
+  - 0.38268343236508984
+  usv_yaw_deg: 135.0
+- drone_pos:
+  - 10.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 1.106538745764405
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 10.08880602280403
+  - 1.3708668342772199e-18
+  - 19.89764614407902
+  gt_dist_m: 22.30919830564849
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 0.0
+  image_file: sample_0015.jpg
+  label: yaw_000
+  sample_id: 15
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  usv_yaw_deg: 0.0
+- drone_pos:
+  - 10.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865475
+  - 0.7071067811865476
+  drone_yaw_deg: 90.0
+  gimbal_pitch_rad: 1.106538745764405
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 1.5707963267948966
+  gt_cam_in_usv:
+  - 7.133863152800412
+  - -6.992441796563104
+  - 19.89764614407902
+  gt_dist_m: 22.264378900750604
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 44.99999999999999
+  image_file: sample_0016.jpg
+  label: yaw_090
+  sample_id: 16
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.3826834323650898
+  - 0.9238795325112867
+  usv_yaw_deg: 45.0
+- drone_pos:
+  - 10.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 1.0
+  - 6.123233995736766e-17
+  drone_yaw_deg: 180.0
+  gimbal_pitch_rad: 1.106538745764405
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 0.0
+  gt_cam_in_usv:
+  - 2.209373361339542e-15
+  - -9.888806022804031
+  - 19.89764614407902
+  gt_dist_m: 22.21946908977863
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 90.00000000000001
+  image_file: sample_0017.jpg
+  label: yaw_180
+  sample_id: 17
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865475
+  - 0.7071067811865476
+  usv_yaw_deg: 90.0
+- drone_pos:
+  - 10.0
+  - 0.0
+  - 20.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865476
+  - -0.7071067811865475
+  drone_yaw_deg: 270.0
+  gimbal_pitch_rad: 1.106538745764405
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 4.71238898038469
+  gt_cam_in_usv:
+  - -7.133863152800412
+  - -6.992441796563105
+  - 19.89764614407902
+  gt_dist_m: 22.264378900750604
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 135.0
+  image_file: sample_0018.jpg
+  label: yaw_270
+  sample_id: 18
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.9238795325112867
+  - 0.38268343236508984
+  usv_yaw_deg: 135.0
+- drone_pos:
+  - 20.0
+  - 20.0
+  - 30.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.3826834323650898
+  - 0.9238795325112867
+  drone_yaw_deg: 45.0
+  gimbal_pitch_rad: 0.8150687606813519
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 27.400539416836793
+  - 7.3419524089185675
+  - 29.901805681058573
+  gt_dist_m: 41.21664479911288
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 15.000000000000002
+  image_file: sample_0019.jpg
+  label: mix_a
+  sample_id: 19
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.25881904510252074
+  - 0.9659258262890683
+  usv_yaw_deg: 29.999999999999996
+- drone_pos:
+  - 30.0
+  - 0.0
+  - 15.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.4642575810304917
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 15.038823072039516
+  - -26.048005646811493
+  - 14.908806022804031
+  gt_dist_m: 33.56988672298477
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -59.99999999999999
+  image_file: sample_0020.jpg
+  label: mix_b
+  sample_id: 20
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.49999999999999994
+  - 0.8660254037844387
+  usv_yaw_deg: 59.99999999999999
+- drone_pos:
+  - 0.0
+  - 20.0
+  - 40.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865475
+  - 0.7071067811865476
+  drone_yaw_deg: 90.0
+  gimbal_pitch_rad: 1.106538745764405
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 17.39741634744613
+  - -10.04440301140201
+  - 39.89764614407902
+  gt_dist_m: 44.66970220697684
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -30.000000000000004
+  image_file: sample_0021.jpg
+  label: mix_c
+  sample_id: 21
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.8660254037844386
+  - 0.5000000000000001
+  usv_yaw_deg: 119.99999999999999
+- drone_pos:
+  - -10.0
+  - 15.0
+  - 25.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  drone_yaw_deg: 0.0
+  gimbal_pitch_rad: 0.9459684545809267
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 5.305800926062762
+  gt_cam_in_usv:
+  - 9.891822395482912
+  - -14.987876202727028
+  - 24.899723404525268
+  gt_dist_m: 30.699850308982157
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: -180.0
+  image_file: sample_0022.jpg
+  label: mix_d
+  sample_id: 22
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 1.0
+  - 6.123233995736766e-17
+  usv_yaw_deg: 180.0
+- drone_pos:
+  - 15.0
+  - -15.0
+  - 60.0
+  drone_quat:
+  - 0.0
+  - 0.0
+  - 0.3826834323650899
+  - -0.9238795325112867
+  drone_yaw_deg: 315.0
+  gimbal_pitch_rad: 1.2304571226560024
+  gimbal_roll_rad: 0.0
+  gimbal_yaw_rad: 3.141592653589793
+  gt_cam_in_usv:
+  - 15.064809750774382
+  - 15.064809750774389
+  - 59.896433962722696
+  gt_dist_m: 63.57263394814513
+  gt_pitch_deg: 0.0
+  gt_roll_deg: 0.0
+  gt_yaw_deg: 45.0
+  image_file: sample_0023.jpg
+  label: mix_e
+  sample_id: 23
+  usv_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  usv_quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865476
+  - -0.7071067811865475
+  usv_yaw_deg: 270.0

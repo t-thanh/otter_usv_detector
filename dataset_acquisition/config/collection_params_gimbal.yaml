@@ -1,0 +1,134 @@
+# Dataset collection parameters — Gremsy G-Hadron gimbal camera on MRS X500 UAV.
+#
+# The collector does NOT fly a real UAV.  Instead it:
+#   1. Samples drone position + gimbal joint angles (pitch, yaw; roll=0).
+#   2. Computes the camera optical pose via forward kinematics (FK).
+#   3. Teleports the virtual camera model (overhead_cam URDF) to that FK pose.
+#   4. Annotates with project_corners_fk() using the full R_opt rotation.
+#
+# The Otter USV stays fixed at world origin throughout.
+# All lengths in metres, angles in degrees unless noted.
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output:
+  dataset_dir: ""       # Filled at runtime: <package>/dataset_gimbal
+  n_positive: 1500
+  n_hn_a: 150           # HN-A: deck-level (0.5–1.5 m), camera sideways/up
+  n_hn_b: 350           # HN-B: low altitude (2–15 m), camera pointing away
+  train_ratio: 0.70
+  val_ratio:   0.20
+  test_ratio:  0.10
+  image_format: "jpg"
+  jpeg_quality: 95
+
+# ── Camera (FLIR Hadron 640R EO — same as real gimbal camera) ─────────────────
+camera:
+  model_name:  "overhead_cam"
+  topic_image: "/overhead_cam/image_raw"
+  width_px:  924
+  height_px: 690
+  hfov_deg:  67.0
+
+# ── Gimbal base offset in drone body frame ────────────────────────────────────
+# Must match gimbal_position_node.py x/y/z_offset params and the SDF macro.
+gimbal:
+  base_offset_m: [0.10, 0.00, 0.00]
+
+# ── Otter model ───────────────────────────────────────────────────────────────
+otter:
+  model_name: "otter"
+
+# ── AR marker / board geometry (in Otter base_link frame) ────────────────────
+# Source: otter_base.urdf.xacro  origin="-0.15 0 0.7"  scale="2.5 2.5 0.05"
+# half_size = 2.5/2 = 1.25 m  (±1.25 m → 2.5×2.5 m panel)
+ar_marker:
+  center_x_m: -0.15
+  center_y_m:  0.0
+  center_z_m:  0.7
+  half_size_m: 1.25
+
+# ── Positive sampling ─────────────────────────────────────────────────────────
+# Drone XY within ±drone_xy_bound_m, altitude in [alt_min, alt_max].
+# Nominal gimbal angles are computed to aim at the USV centre, then jitter is
+# added to distribute the USV bounding box across the image plane.
+# Gimbal pitch clamped to [0, π/2] (no pointing above horizontal for positives).
+positive:
+  altitude_min_m:    5.0
+  altitude_max_m:   70.0
+  drone_xy_bound_m: 30.0
+  pitch_jitter_rad:  0.3   # ± random jitter on the nominal pitch
+  yaw_jitter_rad:    0.3   # ± random jitter on the nominal yaw
+  max_attempts:     30     # rejection-sampling retries per sample
+
+# ── Hard-Negative A: deck-level ───────────────────────────────────────────────
+# UAV sits right on or just above the deck (0.5–1.5 m over water).
+# Gimbal looks sideways / upward — camera sees ocean or sky, NOT the AR panel.
+# Gimbal yaw is drawn from nominal 60°-increment directions + ±jitter (body frame).
+hard_negative_a:
+  altitude_min_m:  0.5
+  altitude_max_m:  1.5
+  gimbal_pitch_min_rad: -1.047    # −60° (pointing upward)
+  gimbal_pitch_max_rad:  0.0      # 0° horizontal
+  yaw_nominal_deg: [0, 60, 120, 180, 240, 300]
+  yaw_jitter_deg:  10.0
+  max_attempts:    20
+
+# ── Hard-Negative B: off-target altitude ─────────────────────────────────────
+# UAV at 2–15 m — high enough that nadir sees the USV, but we point
+# the gimbal sideways or upward so the USV falls outside the FOV.
+hard_negative_b:
+  altitude_min_m:  2.0
+  altitude_max_m:  15.0
+  gimbal_pitch_min_rad: -1.571    # −90° straight up
+  gimbal_pitch_max_rad:  0.785    # +45° below horizontal
+  max_attempts:    20
+
+# ── Visibility filter ─────────────────────────────────────────────────────────
+visibility:
+  min_corners_in_frame: 4
+  border_margin_px: 5
+
+# ── Structured preview grid ───────────────────────────────────────────────────
+# Deterministic samples for preview_only mode.  All parameters are specified
+# directly (no back-projection needed).
+#
+# drone_x/y/z  : drone world position [m]
+# drone_yaw_deg: drone heading [deg]
+# gimbal_pitch_deg: gimbal pitch [deg]  (90 = nadir, 0 = horizontal, <0 = up)
+# gimbal_yaw_deg  : gimbal yaw in drone body frame [deg]
+# expect_usv   : true = warn if USV NOT visible; false = warn if USV IS visible
+#
+# Positive samples: nominal FK to aim at USV — drone at various positions.
+# HN samples    : camera pointing sideways/upward — USV should NOT appear.
+preview_grid:
+  # ── Positives: altitude × tilt sweep ───────────────────────────────────────
+  # show_drone: false — X500 visual stays underground; not visible at these altitudes.
+  - {label: "pos_nadir_10m",  drone_x:  0.0, drone_y:  0.0, drone_z: 10.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     expect_usv: true,  show_drone: false}
+  - {label: "pos_nadir_50m",  drone_x:  0.0, drone_y:  0.0, drone_z: 50.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     expect_usv: true,  show_drone: false}
+  - {label: "pos_tilt_20m",   drone_x: 10.0, drone_y:  0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 63.0, gimbal_yaw_deg: 180.0,
+     expect_usv: true,  show_drone: false}
+  - {label: "pos_tilt_side",  drone_x:  0.0, drone_y: 10.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 63.0, gimbal_yaw_deg: 270.0,
+     expect_usv: true,  show_drone: false}
+  - {label: "pos_oblique",    drone_x: 20.0, drone_y: 20.0, drone_z: 30.0,
+     drone_yaw_deg:  90.0, gimbal_pitch_deg: 43.0, gimbal_yaw_deg: 225.0,
+     expect_usv: true,  show_drone: false}
+  # ── HN-A: deck-level, camera sideways / up ────────────────────────────────
+  - {label: "hn_a_fwd_horiz",  drone_x:  0.0, drone_y:  0.0, drone_z:  1.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg:  0.0, gimbal_yaw_deg:   0.0,
+     expect_usv: false}
+  - {label: "hn_a_left_up",    drone_x:  0.0, drone_y:  0.0, drone_z:  0.8,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: -30.0, gimbal_yaw_deg:  90.0,
+     expect_usv: false}
+  - {label: "hn_a_bwd_horiz",  drone_x:  0.0, drone_y:  0.0, drone_z:  1.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg:  0.0, gimbal_yaw_deg: 180.0,
+     expect_usv: false}
+  # ── HN-B: low altitude, camera away from nadir ─────────────────────────────
+  - {label: "hn_b_5m_up",     drone_x:  0.0, drone_y:  0.0, drone_z:  5.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: -20.0, gimbal_yaw_deg:  45.0,
+     expect_usv: false}

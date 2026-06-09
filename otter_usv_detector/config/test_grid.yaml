@@ -1,0 +1,110 @@
+# test_grid.yaml — 24 deterministic scenarios for full-pose estimator evaluation.
+#
+# The virtual camera (overhead_cam URDF) is teleported via gimbal FK to each
+# scenario pose.  The Otter USV stays fixed at world origin with the given yaw.
+#
+# Convention
+# ----------
+# gimbal_pitch_deg : 90 = nadir (straight down), 0 = horizontal, <0 = upward
+# gimbal_yaw_deg   : 0 = drone +X (forward), 90 = left, 180 = backward, 270 = right
+# All angles are pre-computed so the USV AR panel is centred in the FOV.
+#
+# Groups
+# ------
+# 1  alt_*   Altitude sweep       — drone directly above USV, nadir gimbal
+# 2  rng_*   Range/tilt sweep     — fixed alt=20 m, increasing lateral offset
+# 3  dir_*   Cardinal directions  — four headings at same geometry
+# 4  yaw_*   Drone yaw sweep      — same geometry, drone rotated 0/90/180/270°
+# 5  mix_*   Mixed / challenging  — oblique, high-offset, compound angles
+
+test_grid:
+
+  # ── Group 1: Altitude sweep ───────────────────────────────────────────────
+  # Drone directly above USV.  Tests Z estimation vs. distance.
+  - {label: alt_05,  drone_x:  0.0, drone_y:  0.0, drone_z:  5.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg:   0.0}
+  - {label: alt_10,  drone_x:  0.0, drone_y:  0.0, drone_z: 10.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg:  45.0}
+  - {label: alt_20,  drone_x:  0.0, drone_y:  0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg:  90.0}
+  - {label: alt_30,  drone_x:  0.0, drone_y:  0.0, drone_z: 30.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg: 135.0}
+  - {label: alt_50,  drone_x:  0.0, drone_y:  0.0, drone_z: 50.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg: 180.0}
+  - {label: alt_70,  drone_x:  0.0, drone_y:  0.0, drone_z: 70.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 90.0, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg: 225.0}
+
+  # ── Group 2: Range / tilt sweep ───────────────────────────────────────────
+  # Drone at +X offset (5→25 m), fixed alt=20 m, drone_yaw=0.
+  # gimbal_pitch = atan2(alt, lateral) in degrees.
+  # gimbal_yaw=180° (camera looks toward -X to aim at USV at origin).
+  - {label: rng_05m, drone_x:  5.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 76.0, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:   0.0}
+  - {label: rng_10m, drone_x: 10.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 63.4, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:  30.0}
+  - {label: rng_15m, drone_x: 15.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 53.1, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:  60.0}
+  - {label: rng_20m, drone_x: 20.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 45.0, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:  90.0}
+  - {label: rng_25m, drone_x: 25.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 38.7, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg: 120.0}
+
+  # ── Group 3: Cardinal directions ──────────────────────────────────────────
+  # 15 m lateral offset in each quadrant, alt=20 m, drone_yaw=0.
+  # Tests gimbal yaw estimation accuracy.
+  - {label: dir_pX, drone_x:  15.0, drone_y:   0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 53.1, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:   0.0}
+  - {label: dir_pY, drone_x:   0.0, drone_y:  15.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 53.1, gimbal_yaw_deg: 270.0,
+     usv_yaw_deg:  45.0}
+  - {label: dir_nX, drone_x: -15.0, drone_y:   0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 53.1, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg:  90.0}
+  - {label: dir_nY, drone_x:   0.0, drone_y: -15.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 53.1, gimbal_yaw_deg:  90.0,
+     usv_yaw_deg: 135.0}
+
+  # ── Group 4: Drone yaw sweep ──────────────────────────────────────────────
+  # Drone always at (10, 0, 20), USV at origin; drone heading varies.
+  # gimbal_yaw = world_bearing_to_USV − drone_yaw  (world bearing = 180°).
+  - {label: yaw_000, drone_x: 10.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 63.4, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:   0.0}
+  - {label: yaw_090, drone_x: 10.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg:  90.0, gimbal_pitch_deg: 63.4, gimbal_yaw_deg:  90.0,
+     usv_yaw_deg:  45.0}
+  - {label: yaw_180, drone_x: 10.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg: 180.0, gimbal_pitch_deg: 63.4, gimbal_yaw_deg:   0.0,
+     usv_yaw_deg:  90.0}
+  - {label: yaw_270, drone_x: 10.0, drone_y: 0.0, drone_z: 20.0,
+     drone_yaw_deg: 270.0, gimbal_pitch_deg: 63.4, gimbal_yaw_deg: 270.0,
+     usv_yaw_deg: 135.0}
+
+  # ── Group 5: Mixed / challenging ──────────────────────────────────────────
+  - {label: mix_a, drone_x:  20.0, drone_y:  20.0, drone_z: 30.0,
+     drone_yaw_deg:  45.0, gimbal_pitch_deg: 46.7, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:  30.0}
+  - {label: mix_b, drone_x:  30.0, drone_y:   0.0, drone_z: 15.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 26.6, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg:  60.0}
+  - {label: mix_c, drone_x:   0.0, drone_y:  20.0, drone_z: 40.0,
+     drone_yaw_deg:  90.0, gimbal_pitch_deg: 63.4, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg: 120.0}
+  - {label: mix_d, drone_x: -10.0, drone_y:  15.0, drone_z: 25.0,
+     drone_yaw_deg:   0.0, gimbal_pitch_deg: 54.2, gimbal_yaw_deg: 304.0,
+     usv_yaw_deg: 180.0}
+  - {label: mix_e, drone_x:  15.0, drone_y: -15.0, drone_z: 60.0,
+     drone_yaw_deg: 315.0, gimbal_pitch_deg: 70.5, gimbal_yaw_deg: 180.0,
+     usv_yaw_deg: 270.0}

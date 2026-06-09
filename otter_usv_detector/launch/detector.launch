@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+  detector.launch
+  ───────────────
+  Starts only the YOLO OBB detector node.
+  Expects a live camera publishing on /overhead_cam/image_raw
+  (e.g. from Gazebo with the UAV overhead camera, or from test_image.launch).
+
+  Arguments
+  ─────────
+    config_file   path to detector.yaml  (default: package config/)
+    device        GPU index or "cpu"     (default: "0")
+-->
+<launch>
+
+  <arg name="config_file"
+       default="$(find otter_usv_detector)/config/detector.yaml"/>
+  <arg name="device"        default="0"/>
+  <arg name="conf"          default="0.35"/>
+  <arg name="publish_viz"   default="true"/>
+
+  <!-- Topic overrides — defaults match detector.yaml values -->
+  <arg name="image_topic"     default="/overhead_cam/image_raw"/>
+  <arg name="detection_topic" default="/usv_detection/result"/>
+  <arg name="viz_topic"       default="/usv_detection/image"/>
+
+  <!-- Run detector under the yolo_training conda Python interpreter
+       so that ultralytics is available without sourcing conda manually. -->
+  <node name="otter_usv_detector"
+        pkg="otter_usv_detector"
+        type="detector_node.py"
+        output="screen"
+        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+
+    <!-- Load all parameters from YAML, then allow CLI overrides -->
+    <rosparam file="$(arg config_file)" command="load"/>
+    <param name="device"          value="$(arg device)"/>
+    <param name="conf_threshold"  value="$(arg conf)"/>
+    <param name="publish_viz"     value="$(arg publish_viz)"/>
+    <param name="image_topic"     value="$(arg image_topic)"/>
+    <param name="detection_topic" value="$(arg detection_topic)"/>
+    <param name="viz_topic"       value="$(arg viz_topic)"/>
+
+  </node>
+
+</launch>

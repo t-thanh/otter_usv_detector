@@ -1,0 +1,104 @@
+# Dataset collection parameters for Otter USV YOLO OBB detection
+# All lengths in metres, angles in degrees unless noted.
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output:
+  dataset_dir: ""          # Filled at runtime: <package>/dataset
+  n_samples: 1500          # Total images to collect
+  train_ratio: 0.70
+  val_ratio:   0.20
+  test_ratio:  0.10
+  image_format: "jpg"      # jpg or png
+  jpeg_quality: 95
+
+# ── Camera (FLIR Hadron 640R EO) ─────────────────────────────────────────────
+camera:
+  model_name: "overhead_cam"
+  topic_image: "/overhead_cam/image_raw"
+  topic_info:  "/overhead_cam/camera_info"
+  width_px:  924
+  height_px: 690
+  hfov_deg:  67.0                  # Horizontal FOV → fx=fy≈698, cx=462, cy=345
+  noise_stddev: 0.007
+  update_rate_hz: 30.0
+
+# ── Camera pose randomisation (Gremsy G-Hadron gimbal) ───────────────────────
+# Gimbal controlled ranges: tilt ±120°, pan ±175°, roll ±40°.
+# We use tilt 0–45° to avoid extreme perspective distortion.
+pose:
+  altitude_min_m:    5.0
+  altitude_max_m:   70.0
+  tilt_min_deg:      0.0    # nadir (straight down)
+  tilt_max_deg:     45.0    # max off-nadir, within gimbal ±120° tilt range
+  cam_yaw_min_deg:   0.0
+  cam_yaw_max_deg: 360.0
+  camera_spawn_bounds_m: 30.0   # camera XY sampled uniformly in [-bound, +bound]
+  target_margin_px: 50          # min pixel distance from image edge for AR marker
+                                # centre target; 4-corner filter handles fine edges
+
+# ── Otter ─────────────────────────────────────────────────────────────────────
+# Otter world position is derived by back-projecting the sampled target pixel;
+# otter_yaw is the only remaining free parameter.
+otter:
+  model_name: "otter"
+  settle_time_s: 0.6       # Wait after set_model_state for water physics
+
+# ── AR marker geometry (in Otter base_link frame) ────────────────────────────
+# Source: otter_base.urdf.xacro  origin="-0.15 0 0.7"  scale="2 2 0.05"
+ar_marker:
+  center_x_m: -0.15
+  center_y_m:  0.0
+  center_z_m:  0.7
+  half_size_m: 1.0          # ±1 m → 2×2 m marker
+
+# ── Visibility filter ─────────────────────────────────────────────────────────
+visibility:
+  min_corners_in_frame: 4
+  border_margin_px: 5
+
+# ── Structured preview grid ───────────────────────────────────────────────────
+# Deterministic samples collected in preview_only mode.
+# Camera is placed at world origin (0, 0, alt); Otter position is back-projected
+# from the target pixel (u_frac, v_frac) so the AR marker lands at exactly
+# that normalised image location.
+#
+# u_frac/v_frac : normalised target pixel [0,1] for AR marker centre
+# alt           : camera altitude (m)
+# tilt          : gimbal tilt from nadir (deg)
+# cam_yaw       : camera yaw in world (deg)
+# otter_yaw     : USV heading (deg)
+preview_grid:
+  # ── Group 1: Position sweep — USV in centre and 4 corners ──────────────────
+  # Demonstrates uniform spatial distribution (alt=30 m, tilt=20°)
+  - {u_frac: 0.50, v_frac: 0.50, alt: 30.0, tilt: 20.0, cam_yaw:  0.0, otter_yaw:   0.0, label: "pos_center"}
+  - {u_frac: 0.25, v_frac: 0.25, alt: 30.0, tilt: 20.0, cam_yaw:  0.0, otter_yaw:  45.0, label: "pos_top_left"}
+  - {u_frac: 0.75, v_frac: 0.25, alt: 30.0, tilt: 20.0, cam_yaw:  0.0, otter_yaw:  90.0, label: "pos_top_right"}
+  - {u_frac: 0.25, v_frac: 0.75, alt: 30.0, tilt: 20.0, cam_yaw:  0.0, otter_yaw: 135.0, label: "pos_bot_left"}
+  - {u_frac: 0.75, v_frac: 0.75, alt: 30.0, tilt: 20.0, cam_yaw:  0.0, otter_yaw: 180.0, label: "pos_bot_right"}
+
+  # ── Group 2: Tilt sweep — nadir to 45° (alt=30 m, centre pixel) ────────────
+  - {u_frac: 0.50, v_frac: 0.50, alt: 30.0, tilt:  0.0, cam_yaw: 45.0, otter_yaw:   0.0, label: "tilt_00deg"}
+  - {u_frac: 0.50, v_frac: 0.50, alt: 30.0, tilt: 15.0, cam_yaw: 45.0, otter_yaw:   0.0, label: "tilt_15deg"}
+  - {u_frac: 0.50, v_frac: 0.50, alt: 30.0, tilt: 30.0, cam_yaw: 45.0, otter_yaw:   0.0, label: "tilt_30deg"}
+  - {u_frac: 0.50, v_frac: 0.50, alt: 30.0, tilt: 45.0, cam_yaw: 45.0, otter_yaw:   0.0, label: "tilt_45deg"}
+
+  # ── Group 3: Altitude sweep — 5 m to 70 m (tilt=20°, centre pixel) ─────────
+  - {u_frac: 0.50, v_frac: 0.50, alt:  5.0, tilt:  0.0, cam_yaw: 90.0, otter_yaw:  45.0, label: "alt_05m"}
+  - {u_frac: 0.50, v_frac: 0.50, alt: 20.0, tilt: 20.0, cam_yaw: 90.0, otter_yaw:  45.0, label: "alt_20m"}
+  - {u_frac: 0.50, v_frac: 0.50, alt: 50.0, tilt: 20.0, cam_yaw: 90.0, otter_yaw:  45.0, label: "alt_50m"}
+  - {u_frac: 0.50, v_frac: 0.50, alt: 70.0, tilt: 20.0, cam_yaw: 90.0, otter_yaw:  45.0, label: "alt_70m"}
+
+# ── Dataset augmentation hints (for training phase only) ─────────────────────
+augmentation_hints:
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4
+  degrees: 30.0
+  translate: 0.1
+  scale: 0.5
+  fliplr: 0.5
+  flipud: 0.5
+  mosaic: 1.0
+  copy_paste: 0.1
+  erasing: 0.4
+  mixup: 0.1

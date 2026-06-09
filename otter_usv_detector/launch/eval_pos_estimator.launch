@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<!--
+  eval_pos_estimator.launch
+  ──────────────────────────
+  Offline full-pose evaluation of the YOLO OBB pose estimator.
+  No Gazebo or physical UAV required.
+
+  Pipeline
+  ────────
+    eval_driver_node  ──image──►  detector_node  ──OBB──►  yolo_pose_estimator
+         │  (publishes synthetic Odometry, JointState,               │
+         │   ModelStates, CameraInfo per sample)                     │
+         └──────────── /yolo_pose/uav_in_usv (PoseStamped) ◄────────┘
+                       compared to saved ground truth → errors logged
+
+  Reported metrics (per sample + aggregate mean/std/max/median)
+  ─────────────────
+    err_x, err_y, err_z          [m]   — position components in USV frame
+    err_xy                       [m]   — horizontal planar error
+    err_3d                       [m]   — full 3D Euclidean error
+    err_dist                     [m]   — error in camera-to-USV distance
+    err_roll, err_pitch, err_yaw [°]   — orientation error in USV frame
+
+  Steps
+  ─────
+    1. Collect test samples once:
+         roslaunch otter_usv_detector collect_test_samples.launch
+    2. Run evaluation (no Gazebo needed):
+         roslaunch otter_usv_detector eval_pos_estimator.launch
+    3. Results are printed to console and saved to:
+         <test_samples_dir>/eval_results.yaml
+
+  Arguments
+  ─────────
+    test_samples_dir  path produced by collect_test_samples (default: pkg/test_samples)
+    ns                UAV namespace, must match collect step (default: uav1)
+    device            GPU index or "cpu" for YOLO (default: 0)
+    conf              YOLO confidence threshold (default: 0.35)
+    detect_timeout_s  max seconds to wait per sample for a pose estimate (default: 8.0)
+-->
+<launch>
+
+  <!-- ── Arguments ─────────────────────────────────────────────────────────── -->
+  <arg name="test_samples_dir" default=""    doc="Path to test_samples dir (empty=pkg default)"/>
+  <arg name="ns"               default="uav1" doc="UAV namespace (must match collect step)"/>
+  <arg name="device"           default="0"   doc="GPU index or 'cpu'"/>
+  <arg name="conf"             default="0.35"/>
+  <arg name="detect_timeout_s" default="8.0" doc="Seconds to wait per sample for a pose estimate"/>
+
+  <!-- ── 1. YOLO OBB detector ──────────────────────────────────────────────── -->
+  <!--
+    Subscribes to /<ns>/overhead_cam/image_raw (published by eval_driver).
+    Publishes OBB detections on /usv_detection/result.
+    Wrapped via run_detector.sh so ultralytics is available without conda activate.
+  -->
+  <node name="otter_usv_detector"
+        pkg="otter_usv_detector"
+        type="detector_node.py"
+        output="screen"
+        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+    <rosparam file="$(find otter_usv_detector)/config/detector.yaml" command="load"/>
+    <param name="device"         value="$(arg device)"/>
+    <param name="conf_threshold" value="$(arg conf)"/>
+    <param name="image_topic"    value="/$(arg ns)/overhead_cam/image_raw"/>
+    <param name="publish_viz"    value="true"/>
+  </node>
+
+  <!-- ── 2. YOLO OBB pose estimator ────────────────────────────────────────── -->
+  <!--
+    Reads drone state from:
+      /<ns>/ground_truth          (nav_msgs/Odometry)
+      /<ns>/gimbal/joint_states   (sensor_msgs/JointState)
+      /gazebo/model_states        (gazebo_msgs/ModelStates — for 'otter' pose)
+      /<ns>/overhead_cam/camera_info
+    Subscribes to OBB detections on /usv_detection/result.
+    Publishes estimated pose on /yolo_pose/uav_in_usv.
+  -->
+  <node name="yolo_pose_estimator"
+        pkg="otter_usv_detector"
+        type="yolo_pose_estimator_node.py"
+        output="screen">
+    <param name="gimbal_ns"          value="$(arg ns)"/>
+    <param name="usv_model_name"     value="otter"/>
+    <param name="detection_topic"    value="/usv_detection/result"/>
+
+    <!-- Gimbal mount offset (must match collect_test_samples FK constants) -->
+    <param name="base_x_offset"      value="0.10"/>
+    <param name="base_y_offset"      value="0.00"/>
+    <param name="base_z_offset"      value="0.00"/>
+
+    <!-- Pose quality filters -->
+    <param name="conf_threshold"     value="$(arg conf)"/>
+    <param name="max_reproj_err_px"  value="25.0"/>
+    <param name="altitude_tol_m"     value="5.0"/>
+
+    <!-- Camera intrinsics (FLIR Hadron 640R EO — overridden by camera_info) -->
+    <param name="hfov_deg"           value="67.0"/>
+    <param name="image_width"        value="924"/>
+    <param name="image_height"       value="690"/>
+  </node>
+
+  <!-- ── 3. Evaluation driver ──────────────────────────────────────────────── -->
+  <!--
+    Replays saved images one by one, publishing synthetic drone + gimbal state
+    so yolo_pose_estimator behaves as if a live UAV were flying.
+    Compares /yolo_pose/uav_in_usv to the saved 6-DOF ground truth.
+    Results saved to <test_samples_dir>/eval_results.yaml on completion.
+  -->
+  <node name="eval_driver_node"
+        pkg="otter_usv_detector"
+        type="eval_driver_node.py"
+        output="screen"
+        required="true">
+    <param name="ns"               value="$(arg ns)"/>
+    <param name="test_samples_dir" value="$(arg test_samples_dir)"/>
+    <param name="detect_timeout_s" value="$(arg detect_timeout_s)"/>
+  </node>
+
+</launch>

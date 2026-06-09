@@ -1,0 +1,36 @@
+# ROS build artifacts
+build/
+devel/
+logs/
+install/
+.catkin_tools/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Large dataset and training outputs (use Git LFS or external storage)
+dataset/images/
+dataset/labels/
+dataset/preview/
+dataset/_tmp/
+dataset/verify_out/
+dataset/*.yaml
+dataset_gimbal/
+runs/
+
+# Model weights (store in GitHub Releases or LFS)
+*.pt
+*.onnx
+*.weights
+*.engine
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store

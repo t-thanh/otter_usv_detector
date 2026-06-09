@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+  validation_platform.sdf
+  ────────────────────────
+  Static 2 × 2 × 1 m concrete block spawned at (5, 0, 0).
+  Top face is at z = 1 m.
+
+  The X500 UAV is spawned on top via mrs_drone_spawner with pos 5 0 2 0,
+  placing the UAV body 1 m above the platform surface (same clearance as the
+  standard ground spawn at z = 1 over z = 0 terrain).
+
+  Positioned 5 m from the Otter USV (world origin) so the gimbal camera has a
+  clear sightline once the UAV climbs to ~8 m altitude.
+-->
+<sdf version="1.6">
+  <model name="validation_platform">
+    <static>true</static>
+    <link name="link">
+      <pose>5 0 0.5 0 0 0</pose>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>2 2 1</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.8</mu>
+              <mu2>0.8</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <!-- transparency=1 makes the mesh fully invisible to Gazebo camera
+             sensors (rendered alpha=0) while the collision geometry stays active. -->
+        <transparency>1.0</transparency>
+        <geometry>
+          <box>
+            <size>2 2 1</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.55 0.55 0.55 1</ambient>
+          <diffuse>0.55 0.55 0.55 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
