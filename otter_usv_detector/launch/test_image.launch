@@ -25,7 +25,7 @@
 
   <!-- ── Arguments ─────────────────────────────────────────────────────── -->
   <arg name="image_path"
-       default="/home/t-thanh/Garage/uav_usv_sim/src/dataset_acquisition/dataset_gimbal/images/test"/>
+       default="$(find otter_usv_detector)/test_samples"/>
   <arg name="rate_hz"       default="5.0"/>
   <arg name="loop"          default="true"/>
   <arg name="device"        default="0"/>
@@ -51,7 +51,7 @@
         pkg="otter_usv_detector"
         type="detector_node.py"
         output="screen"
-        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+        launch-prefix="$(find otter_usv_detector)/scripts/run_detector.sh">
     <rosparam file="$(arg config_file)" command="load"/>
     <param name="device"         value="$(arg device)"/>
     <param name="conf_threshold" value="$(arg conf)"/>

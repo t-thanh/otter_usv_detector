@@ -1,4 +1,4 @@
-#!/home/t-thanh/anaconda3/envs/yolo_training/bin/python3
+#!/usr/bin/env python3
 """
 detector_node.py
 ────────────────
@@ -56,7 +56,14 @@ class OtterDetectorNode:
         rospy.init_node("otter_usv_detector", anonymous=False)
 
         # ── Parameters ───────────────────────────────────────────────────────
-        model_path       = rospy.get_param("~model_path")
+        # model_path may be left empty (launch files normally override it with
+        # $(find otter_usv_detector)/models/best.pt). Fall back to that package
+        # path so the node stays portable even without an explicit override.
+        model_path       = rospy.get_param("~model_path", "")
+        if not model_path:
+            import rospkg
+            pkg_dir = rospkg.RosPack().get_path("otter_usv_detector")
+            model_path = os.path.join(pkg_dir, "models", "best.pt")
         image_topic      = rospy.get_param("~image_topic",      "/overhead_cam/image_raw")
         detection_topic  = rospy.get_param("~detection_topic",  "/usv_detection/result")
         viz_topic        = rospy.get_param("~viz_topic",         "/usv_detection/image")

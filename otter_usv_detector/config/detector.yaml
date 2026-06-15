@@ -1,7 +1,13 @@
 # ── otter_usv_detector configuration ─────────────────────────────────────────
 
-# Absolute path to the trained YOLO OBB weights file.
-model_path: "/home/t-thanh/Garage/uav_usv_sim/src/dataset_acquisition/runs/obb/Nested_Otter_YOLO2/weights/best.pt"
+# Path to the trained YOLO OBB weights file.
+# Left empty here on purpose: every launch file overrides it with
+#   model_path:=$(find otter_usv_detector)/models/best.pt
+# so the path stays portable across machines and inside Docker.
+# Download the weights into models/best.pt (gitignored):
+#   wget -O models/best.pt \
+#     https://github.com/t-thanh/otter_usv_detector/releases/download/weights-v1/best.pt
+model_path: ""
 
 # ROS topics
 image_topic:      "/overhead_cam/image_raw"   # input  — sensor_msgs/Image

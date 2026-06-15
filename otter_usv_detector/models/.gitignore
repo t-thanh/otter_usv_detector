@@ -1,0 +1,7 @@
+# Trained YOLO weights are distributed as a GitHub release asset, not committed.
+# Download into this directory:
+#   wget -O best.pt \
+#     https://github.com/t-thanh/otter_usv_detector/releases/download/weights-v1/best.pt
+*.pt
+*.onnx
+*.engine

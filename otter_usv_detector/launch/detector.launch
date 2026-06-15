@@ -30,7 +30,7 @@
         pkg="otter_usv_detector"
         type="detector_node.py"
         output="screen"
-        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+        launch-prefix="$(find otter_usv_detector)/scripts/run_detector.sh">
 
     <!-- Load all parameters from YAML, then allow CLI overrides -->
     <rosparam file="$(arg config_file)" command="load"/>

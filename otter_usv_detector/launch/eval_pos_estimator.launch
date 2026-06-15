@@ -57,7 +57,7 @@
         pkg="otter_usv_detector"
         type="detector_node.py"
         output="screen"
-        launch-prefix="/home/t-thanh/Garage/uav_usv_sim/src/otter_usv_detector/scripts/run_detector.sh">
+        launch-prefix="$(find otter_usv_detector)/scripts/run_detector.sh">
     <rosparam file="$(find otter_usv_detector)/config/detector.yaml" command="load"/>
     <param name="device"         value="$(arg device)"/>
     <param name="conf_threshold" value="$(arg conf)"/>
